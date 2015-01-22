@@ -8,11 +8,9 @@ domready(function(){
 	var notionalView = notionalViewFactory.create({
 		el: el,
 		value: 0		
-	});
+	});	
 
-	notionalView.on('display-date', function(){		
-		console.log('date: ', new Date());
-	});
-
-	notionalView.render();
+	notionalView.on('change:value', function(){		
+		console.log('input: ', this.value);
+	});	
 });

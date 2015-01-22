@@ -11,13 +11,131 @@ domready(function(){
 		value: 0		
 	});
 
-	notionalView.on('display-date', function(){		
-		console.log('date: ', new Date());
-	});
-
-	notionalView.render();
+	notionalView.on('change:value', function(){		
+		console.log('input: ', this.value);
+	});	
 });
 },{"./notionalView":27,"domready":26}],2:[function(require,module,exports){
+;if (typeof window !== "undefined") {  window.ampersand = window.ampersand || {};  window.ampersand["ampersand-dom"] = window.ampersand["ampersand-dom"] || [];  window.ampersand["ampersand-dom"].push("1.2.7");}
+var dom = module.exports = {
+    text: function (el, val) {
+        el.textContent = getString(val);
+    },
+    // optimize if we have classList
+    addClass: function (el, cls) {
+        cls = getString(cls);
+        if (!cls) return;
+        if (Array.isArray(cls)) {
+            cls.forEach(function(c) {
+                dom.addClass(el, c);
+            });
+        } else if (el.classList) {
+            el.classList.add(cls);
+        } else {
+            if (!hasClass(el, cls)) {
+                if (el.classList) {
+                    el.classList.add(cls);
+                } else {
+                    el.className += ' ' + cls;
+                }
+            }
+        }
+    },
+    removeClass: function (el, cls) {
+        if (Array.isArray(cls)) {
+            cls.forEach(function(c) {
+                dom.removeClass(el, c);
+            });
+        } else if (el.classList) {
+            cls = getString(cls);
+            if (cls) el.classList.remove(cls);
+        } else {
+            // may be faster to not edit unless we know we have it?
+            el.className = el.className.replace(new RegExp('(^|\\b)' + cls.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
+        }
+    },
+    hasClass: hasClass,
+    switchClass: function (el, prevCls, newCls) {
+        if (prevCls) this.removeClass(el, prevCls);
+        this.addClass(el, newCls);
+    },
+    // makes sure attribute (with no content) is added
+    // if exists it will be cleared of content
+    addAttribute: function (el, attr) {
+        // setting to empty string does same
+        el.setAttribute(attr, '');
+        // Some browsers won't update UI for boolean attributes unless you
+        // set it directly. So we do both
+        if (hasBooleanProperty(el, attr)) el[attr] = true;
+    },
+    // completely removes attribute
+    removeAttribute: function (el, attr) {
+        el.removeAttribute(attr);
+        if (hasBooleanProperty(el, attr)) el[attr] = false;
+    },
+    // sets attribute to string value given, clearing any current value
+    setAttribute: function (el, attr, value) {
+        el.setAttribute(attr, getString(value));
+    },
+    getAttribute: function (el, attr) {
+        return el.getAttribute(attr);
+    },
+    hide: function (el) {
+        if (!isHidden(el)) {
+            storeDisplayStyle(el);
+            hide(el);
+        }
+    },
+    // show element
+    show: function (el) {
+        show(el);
+    },
+    html: function (el, content) {
+        el.innerHTML = content;
+    }
+};
+
+// helpers
+function getString(val) {
+    if (!val && val !== 0) {
+        return '';
+    } else {
+        return val;
+    }
+}
+
+function hasClass(el, cls) {
+    if (el.classList) {
+        return el.classList.contains(cls);
+    } else {
+        return new RegExp('(^| )' + cls + '( |$)', 'gi').test(el.className);
+    }
+}
+
+function hasBooleanProperty(el, prop) {
+    var val = el[prop];
+    return prop in el && (val === true || val === false);
+}
+
+function isHidden (el) {
+    return dom.getAttribute(el, 'data-anddom-hidden') === 'true';
+}
+
+function storeDisplayStyle (el) {
+    dom.setAttribute(el, 'data-anddom-display', el.style.display);
+}
+
+function show (el) {
+    el.style.display = dom.getAttribute(el, 'data-anddom-display') || '';
+    dom.removeAttribute(el, 'data-anddom-hidden');
+}
+
+function hide (el) {
+    dom.setAttribute(el, 'data-anddom-hidden', 'true');
+    el.style.display = 'none';
+}
+
+},{}],3:[function(require,module,exports){
 ;if (typeof window !== "undefined") {  window.ampersand = window.ampersand || {};  window.ampersand["ampersand-input-view"] = window.ampersand["ampersand-input-view"] || [];  window.ampersand["ampersand-input-view"].push("3.1.1");}
 var View = require('ampersand-view');
 
@@ -231,7 +349,7 @@ module.exports = View.extend({
     }
 });
 
-},{"ampersand-view":3}],3:[function(require,module,exports){
+},{"ampersand-view":4}],4:[function(require,module,exports){
 ;if (typeof window !== "undefined") {  window.ampersand = window.ampersand || {};  window.ampersand["ampersand-view"] = window.ampersand["ampersand-view"] || [];  window.ampersand["ampersand-view"].push("7.2.0");}
 var State = require('ampersand-state');
 var CollectionView = require('ampersand-collection-view');
@@ -601,7 +719,7 @@ _.extend(View.prototype, {
 View.extend = BaseState.extend;
 module.exports = View;
 
-},{"ampersand-collection-view":4,"ampersand-dom-bindings":9,"ampersand-state":12,"domify":17,"events-mixin":18,"get-object-path":23,"matches-selector":24,"underscore":25}],4:[function(require,module,exports){
+},{"ampersand-collection-view":5,"ampersand-dom-bindings":10,"ampersand-state":12,"domify":17,"events-mixin":18,"get-object-path":23,"matches-selector":24,"underscore":25}],5:[function(require,module,exports){
 ;if (typeof window !== "undefined") {  window.ampersand = window.ampersand || {};  window.ampersand["ampersand-collection-view"] = window.ampersand["ampersand-collection-view"] || [];  window.ampersand["ampersand-collection-view"].push("1.2.0");}
 var _ = require('underscore');
 var BBEvents = require('backbone-events-standalone');
@@ -762,7 +880,7 @@ CollectionView.extend = ampExtend;
 
 module.exports = CollectionView;
 
-},{"ampersand-class-extend":5,"backbone-events-standalone":8,"underscore":25}],5:[function(require,module,exports){
+},{"ampersand-class-extend":6,"backbone-events-standalone":9,"underscore":25}],6:[function(require,module,exports){
 var objectExtend = require('extend-object');
 
 
@@ -812,7 +930,7 @@ var extend = function(protoProps) {
 // Expose the extend function
 module.exports = extend;
 
-},{"extend-object":6}],6:[function(require,module,exports){
+},{"extend-object":7}],7:[function(require,module,exports){
 var arr = [];
 var each = arr.forEach;
 var slice = arr.slice;
@@ -829,7 +947,7 @@ module.exports = function(obj) {
     return obj;
 };
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /**
  * Standalone extraction of Backbone.Events, no external dependency required.
  * Degrades nicely when Backone/underscore are already available in the current
@@ -1108,10 +1226,10 @@ module.exports = function(obj) {
   }
 })(this);
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 module.exports = require('./backbone-events-standalone');
 
-},{"./backbone-events-standalone":7}],9:[function(require,module,exports){
+},{"./backbone-events-standalone":8}],10:[function(require,module,exports){
 ;if (typeof window !== "undefined") {  window.ampersand = window.ampersand || {};  window.ampersand["ampersand-dom-bindings"] = window.ampersand["ampersand-dom-bindings"] || [];  window.ampersand["ampersand-dom-bindings"].push("3.3.3");}
 var Store = require('key-tree-store');
 var dom = require('ampersand-dom');
@@ -1305,127 +1423,7 @@ function getBindingFunc(binding, context) {
     }
 }
 
-},{"ampersand-dom":10,"key-tree-store":11,"matches-selector":24}],10:[function(require,module,exports){
-;if (typeof window !== "undefined") {  window.ampersand = window.ampersand || {};  window.ampersand["ampersand-dom"] = window.ampersand["ampersand-dom"] || [];  window.ampersand["ampersand-dom"].push("1.2.7");}
-var dom = module.exports = {
-    text: function (el, val) {
-        el.textContent = getString(val);
-    },
-    // optimize if we have classList
-    addClass: function (el, cls) {
-        cls = getString(cls);
-        if (!cls) return;
-        if (Array.isArray(cls)) {
-            cls.forEach(function(c) {
-                dom.addClass(el, c);
-            });
-        } else if (el.classList) {
-            el.classList.add(cls);
-        } else {
-            if (!hasClass(el, cls)) {
-                if (el.classList) {
-                    el.classList.add(cls);
-                } else {
-                    el.className += ' ' + cls;
-                }
-            }
-        }
-    },
-    removeClass: function (el, cls) {
-        if (Array.isArray(cls)) {
-            cls.forEach(function(c) {
-                dom.removeClass(el, c);
-            });
-        } else if (el.classList) {
-            cls = getString(cls);
-            if (cls) el.classList.remove(cls);
-        } else {
-            // may be faster to not edit unless we know we have it?
-            el.className = el.className.replace(new RegExp('(^|\\b)' + cls.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
-        }
-    },
-    hasClass: hasClass,
-    switchClass: function (el, prevCls, newCls) {
-        if (prevCls) this.removeClass(el, prevCls);
-        this.addClass(el, newCls);
-    },
-    // makes sure attribute (with no content) is added
-    // if exists it will be cleared of content
-    addAttribute: function (el, attr) {
-        // setting to empty string does same
-        el.setAttribute(attr, '');
-        // Some browsers won't update UI for boolean attributes unless you
-        // set it directly. So we do both
-        if (hasBooleanProperty(el, attr)) el[attr] = true;
-    },
-    // completely removes attribute
-    removeAttribute: function (el, attr) {
-        el.removeAttribute(attr);
-        if (hasBooleanProperty(el, attr)) el[attr] = false;
-    },
-    // sets attribute to string value given, clearing any current value
-    setAttribute: function (el, attr, value) {
-        el.setAttribute(attr, getString(value));
-    },
-    getAttribute: function (el, attr) {
-        return el.getAttribute(attr);
-    },
-    hide: function (el) {
-        if (!isHidden(el)) {
-            storeDisplayStyle(el);
-            hide(el);
-        }
-    },
-    // show element
-    show: function (el) {
-        show(el);
-    },
-    html: function (el, content) {
-        el.innerHTML = content;
-    }
-};
-
-// helpers
-function getString(val) {
-    if (!val && val !== 0) {
-        return '';
-    } else {
-        return val;
-    }
-}
-
-function hasClass(el, cls) {
-    if (el.classList) {
-        return el.classList.contains(cls);
-    } else {
-        return new RegExp('(^| )' + cls + '( |$)', 'gi').test(el.className);
-    }
-}
-
-function hasBooleanProperty(el, prop) {
-    var val = el[prop];
-    return prop in el && (val === true || val === false);
-}
-
-function isHidden (el) {
-    return dom.getAttribute(el, 'data-anddom-hidden') === 'true';
-}
-
-function storeDisplayStyle (el) {
-    dom.setAttribute(el, 'data-anddom-display', el.style.display);
-}
-
-function show (el) {
-    el.style.display = dom.getAttribute(el, 'data-anddom-display') || '';
-    dom.removeAttribute(el, 'data-anddom-hidden');
-}
-
-function hide (el) {
-    dom.setAttribute(el, 'data-anddom-hidden', 'true');
-    el.style.display = 'none';
-}
-
-},{}],11:[function(require,module,exports){
+},{"ampersand-dom":2,"key-tree-store":11,"matches-selector":24}],11:[function(require,module,exports){
 var slice = Array.prototype.slice;
 
 // our constructor
@@ -2560,8 +2558,8 @@ module.exports = function arrayNext(array, currentItem) {
 })(this);
 
 },{}],15:[function(require,module,exports){
-arguments[4][8][0].apply(exports,arguments)
-},{"./backbone-events-standalone":14,"dup":8}],16:[function(require,module,exports){
+arguments[4][9][0].apply(exports,arguments)
+},{"./backbone-events-standalone":14,"dup":9}],16:[function(require,module,exports){
 function KeyTreeStore() {
     this.storage = {};
 }
@@ -4465,16 +4463,14 @@ function match(el, selector) {
 },{}],27:[function(require,module,exports){
 'use strict';
 
-//var Emitter = require('wildemitter');
 var AmpersandInputView = require('ampersand-input-view');
 
 var View = AmpersandInputView.extend({
+	autoRender: true,
 	initialize: function(){		
 		AmpersandInputView.prototype.initialize.call(this, arguments);
 
-		//Emitter.call(this);
-
-		this.on('change:inputValue', this.displayValue, this);
+		this.on('change:inputValue', this.expandValue, this);
 	},	
 	props: {
 		expandedValue: 'string'
@@ -4490,9 +4486,8 @@ var View = AmpersandInputView.extend({
 			}
 		}
 	},
-	displayValue: function(){
-		console.log(this.inputValue);
-		this.trigger('display-date', this);
+	expandValue: function(){
+		this.expandedValue = Number(this.inputValue).toFixed(2)
 	}
 });
 
@@ -4502,4 +4497,4 @@ module.exports = {
 		return new View(options);
 	}
 };
-},{"ampersand-input-view":2}]},{},[1]);
+},{"ampersand-input-view":3}]},{},[1]);

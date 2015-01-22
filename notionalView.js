@@ -3,10 +3,11 @@
 var AmpersandInputView = require('ampersand-input-view');
 
 var View = AmpersandInputView.extend({
+	autoRender: true,
 	initialize: function(){		
 		AmpersandInputView.prototype.initialize.call(this, arguments);
 
-		this.on('change:inputValue', this.displayValue, this);
+		this.on('change:inputValue', this.expandValue, this);
 	},	
 	props: {
 		expandedValue: 'string'
@@ -22,9 +23,8 @@ var View = AmpersandInputView.extend({
 			}
 		}
 	},
-	displayValue: function(){
-		console.log(this.inputValue);
-		this.trigger('display-date', this);
+	expandValue: function(){
+		this.expandedValue = Number(this.inputValue).toFixed(2)
 	}
 });
 
