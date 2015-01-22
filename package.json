@@ -1,0 +1,21 @@
+{
+  "name": "notional",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "browserify ./app.js > js/app.bundle.js"
+  },
+  "author": "Benjamin Nwaneampeh",
+  "license": "ISC",
+  "dependencies": {
+    "ampersand-dom": "^1.2.7",
+    "ampersand-form-view": "^2.2.0",
+    "ampersand-input-view": "^3.1.1",
+    "domready": "^1.0.7",
+    "wildemitter": "^1.0.1"
+  },
+  "devDependencies": {
+    "browserify": "^8.1.1"
+  }
+}
